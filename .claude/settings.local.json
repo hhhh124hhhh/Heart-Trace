@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm dev)",
+      "Bash(node:*)",
+      "Bash(mv:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)",
+      "Bash(timeout:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  }
+}

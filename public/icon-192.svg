@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景圆形 -->
+  <circle cx="96" cy="96" r="88" fill="white" stroke="url(#heartGradient)" stroke-width="8"/>
+  
+  <!-- 心形图案 -->
+  <path d="M96 148l-8-7.3C69.1 124.8 48 111 48 88c0-15.3 10.8-26.7 24-26.7 6.6 0 12.9 3.1 17.6 8.1C94.3 64.4 100.6 61.3 107.2 61.3c13.2 0 24 11.4 24 26.7 0 23-21.1 36.8-39.2 52.7L96 148z" 
+        fill="url(#heartGradient)" 
+        stroke="none"/>
+  
+  <!-- 小书本装饰 -->
+  <g transform="translate(118, 104) scale(2.5)">
+    <rect x="0" y="0" width="12" height="16" rx="1" fill="white" opacity="0.9"/>
+    <line x1="2" y1="4" x2="10" y2="4" stroke="url(#heartGradient)" stroke-width="1"/>
+    <line x1="2" y1="8" x2="10" y2="8" stroke="url(#heartGradient)" stroke-width="1"/>
+    <line x1="2" y1="12" x2="8" y2="12" stroke="url(#heartGradient)" stroke-width="1"/>
+  </g>
+</svg>

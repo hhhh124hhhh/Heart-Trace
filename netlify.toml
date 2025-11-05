@@ -1,0 +1,30 @@
+[build]
+  functions = "netlify/functions"
+  command = "pnpm build"
+
+[functions]
+  node_version = "18"
+  node_bundler = "esbuild"
+
+# 环境变量需要在Netlify控制台中设置
+# ZHIPU_API_KEY = "your-zhipu-api-key-here"
+
+[[redirects]]
+  from = "/api/zhipu-proxy"
+  to = "/.netlify/functions/zhipu-proxy"
+  status = 200
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+# 速率限制头
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-RateLimit-Limit = "100"
+    X-RateLimit-Remaining = "99"
+    X-RateLimit-Reset = "86400"
