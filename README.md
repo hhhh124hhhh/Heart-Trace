@@ -127,14 +127,6 @@ pnpm dev
 3. 设置环境变量 `ZHIPU_API_KEY`
 4. 自动部署完成
 
-### 本地开发
-```bash
-git clone https://github.com/yourusername/daily-reflection.git
-cd daily-reflection
-pnpm install
-cp .env.example .env  # 配置API密钥
-pnpm dev
-```
 
 ## 🤝 贡献指南
 
@@ -145,12 +137,6 @@ pnpm dev
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 开启 Pull Request
-
-### 开源建议
-- 更新 `README.md` 中的部署链接指向你的仓库
-- 确保 `.gitignore` 文件合理配置，不包含敏感信息
-- 在首次提交前删除 `.env` 文件中的实际API密钥
-- 考虑添加一个详细的项目介绍视频或截图
 
 ## 📄 开源协议
 
