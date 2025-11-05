@@ -79,3 +79,6 @@ Icon?
 .skip-template
 cloudbaserc.json
 DEPLOYMENT_GUIDE.md
+心迹数据导出_2025-11-05_21-02-09.json
+test-export.html
+scripts/test-export.cjs

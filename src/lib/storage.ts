@@ -1,6 +1,33 @@
 import localforage from 'localforage';
 import type { DailyRecord, Tag, UserStats, UserSettings } from '../types';
 
+// 导出相关类型定义
+export interface ExportData {
+  exportInfo: {
+    version: string;
+    exportDate: string;
+    totalRecords: number;
+    dateRange: {
+      start: string;
+      end: string;
+    };
+  };
+  records: DailyRecord[];
+  tags: Tag[];
+  settings: UserSettings;
+  stats: UserStats;
+}
+
+export interface ExportOptions {
+  format: 'json' | 'csv';
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+  includeSettings?: boolean;
+  includeStats?: boolean;
+}
+
 // 初始化数据存储
 const recordStore = localforage.createInstance({
   name: 'daily-reflection',
@@ -228,4 +255,109 @@ export const settingsDB = {
     await settingsStore.setItem('settings', updated);
     return updated;
   },
+};
+
+// 数据导出相关操作
+export const exportDB = {
+  // 获取导出数据
+  async getExportData(options: ExportOptions = { format: 'json' }): Promise<ExportData> {
+    // 获取记录
+    let records = await recordsDB.getAll();
+    
+    // 应用日期范围筛选
+    if (options.dateRange) {
+      records = records.filter(record => {
+        const recordDate = new Date(record.date);
+        const startDate = new Date(options.dateRange!.start);
+        const endDate = new Date(options.dateRange!.end);
+        return recordDate >= startDate && recordDate <= endDate;
+      });
+    }
+
+    // 获取其他数据
+    const tags = await tagsDB.getAll();
+    const settings = await settingsDB.get();
+    const stats = await statsDB.get();
+
+    // 确定日期范围
+    const dateRange = {
+      start: records.length > 0 ? records[records.length - 1].date : new Date().toISOString(),
+      end: records.length > 0 ? records[0].date : new Date().toISOString()
+    };
+
+    return {
+      exportInfo: {
+        version: '1.0.0',
+        exportDate: new Date().toISOString(),
+        totalRecords: records.length,
+        dateRange
+      },
+      records,
+      tags: options.includeSettings !== false ? tags : [],
+      settings: options.includeSettings !== false ? settings : {
+        nickname: '',
+        defaultPrivate: false,
+        dailyReminder: false,
+        reminderTime: '20:00',
+        faceLock: false,
+      },
+      stats: options.includeStats !== false ? stats : {
+        totalRecords: 0,
+        continuousDays: 0,
+        startDate: new Date().toISOString(),
+        emotionDistribution: {},
+      }
+    };
+  },
+
+  // 转换为JSON格式
+  toJSON(exportData: ExportData): string {
+    return JSON.stringify(exportData, null, 2);
+  },
+
+  // 转换为CSV格式
+  toCSV(exportData: ExportData): string {
+    const headers = [
+      '日期',
+      '内容', 
+      '标签',
+      '平静度',
+      '正向度',
+      '能量值',
+      'AI回应',
+      '是否收藏',
+      '创建时间'
+    ];
+
+    const csvRows = [
+      headers.join(','),
+      ...exportData.records.map(record => [
+        record.date,
+        `"${this.escapeCsvField(record.content)}"`,
+        `"${record.tags.join(', ')}"`,
+        record.emotionAnalysis?.calmness || '',
+        record.emotionAnalysis?.positivity || '',
+        record.emotionAnalysis?.energy || '',
+        `"${this.escapeCsvField(record.aiResponse || '')}"`,
+        record.isFavorite ? '是' : '否',
+        new Date(record.createdAt).toLocaleString('zh-CN')
+      ])
+    ];
+
+    return '\uFEFF' + csvRows.join('\n'); // 添加BOM以支持中文
+  },
+
+  // CSV字段转义
+  escapeCsvField(field: string): string {
+    return field.replace(/"/g, '""').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+  },
+
+  // 生成导出文件名
+  generateFileName(format: 'json' | 'csv'): string {
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+    
+    return `心迹数据导出_${dateStr}_${timeStr}.${format}`;
+  }
 };

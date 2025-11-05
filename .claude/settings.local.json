@@ -13,7 +13,8 @@
       "Bash(pnpm add:*)",
       "Bash(curl:*)",
       "Bash(rm:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(pnpm run lint)"
     ],
     "defaultMode": "acceptEdits"
   }

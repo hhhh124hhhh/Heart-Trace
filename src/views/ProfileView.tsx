@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Tag, TrendingUp, Lock, Bell, Info, Bot, ChevronRight } from 'lucide-react';
+import { User, Tag, TrendingUp, Lock, Bell, Info, Bot, ChevronRight, Download } from 'lucide-react';
 import { settingsDB, statsDB, tagsDB, DEFAULT_TAGS } from '../lib/storage';
 import { aiSettingsDB } from '../lib/aiSettingsDB';
 import { EmotionTag } from '../components/EmotionTag';
 import { Button } from '../components/Button';
+import { DataExportModal } from '../components/DataExportModal';
 import type { UserSettings, UserStats, Tag as TagType } from '../types';
 import { aiService } from '../lib/aiService';
 
@@ -20,6 +21,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
     checking: true,
     message: '检查中...'
   });
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // 检查AI服务状态
   const checkAIServiceStatus = async () => {
@@ -204,8 +206,23 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
         <div className="mb-32 animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <h3 className="text-h3 font-semibold text-neutral-dark mb-16">设置</h3>
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden">
+            {/* 数据导出 */}
+            <button
+              onClick={() => setShowExportModal(true)}
+              className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors border-b border-neutral-mist"
+            >
+              <div className="flex items-center gap-12">
+                <Download className="w-5 h-5 text-neutral-stone" />
+                <div className="text-left">
+                  <div className="text-body text-neutral-dark">数据导出</div>
+                  <div className="text-caption text-neutral-stone">导出您的所有记录和设置</div>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-neutral-stone" />
+            </button>
+            
             {/* 默认隐私模式 */}
-            <div className="flex items-center justify-between p-24 border-b border-neutral-mist">
+            <div className="flex items-center justify-between p-24">
               <div className="flex items-center gap-12">
                 <Lock className="w-5 h-5 text-neutral-stone" />
                 <div>
@@ -226,8 +243,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
                 `} />
               </button>
             </div>
-            
-            {/* 只保留一个默认隐私模式设置项 */}
           </div>
         </div>
         
@@ -244,6 +259,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
           </div>
         </div>
       </div>
+      
+      {/* 数据导出模态框 */}
+      <DataExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+      />
     </div>
   );
 };
