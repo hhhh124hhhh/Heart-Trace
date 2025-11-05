@@ -26,7 +26,7 @@ async function callAPIProxy(request: AIResponseRequest): Promise<{
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'glm-4-flash',
+        model: import.meta.env.ZHIPU_MODEL || 'glm-4-flash',
         messages: [
           {
             role: 'system',
