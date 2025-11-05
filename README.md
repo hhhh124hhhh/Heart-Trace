@@ -1,8 +1,7 @@
-# 💝 心迹 (Heart Trace) - 记录心情，温暖陪伴
+# ![心迹Logo](public/favicon.svg) 心迹 (Heart Trace) - 记录心情，温暖陪伴
 
 一个基于React + TypeScript的心理健康应用，通过AI提供温柔回应，帮助用户记录和调节情绪。
 
-![心迹Logo](public/favicon.svg)
 
 ## ✨ 核心功能
 
