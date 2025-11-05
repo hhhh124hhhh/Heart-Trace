@@ -10,7 +10,10 @@
     "lint": "pnpm install --prefer-offline && eslint .",
     "preview": "pnpm install --prefer-offline && vite preview",
     "install-deps": "pnpm install --prefer-offline",
-    "clean": "rm -rf node_modules .pnpm-store pnpm-lock.yaml && pnpm store prune"
+    "clean": "rm -rf node_modules .pnpm-store pnpm-lock.yaml && pnpm store prune",
+    "rate-limit-test": "node scripts/test-rate-limit.cjs",
+    "rate-limit-test:fast": "node scripts/test-rate-limit.cjs --concurrency=10 --requests=50 --interval=50",
+    "rate-limit-test:stress": "node scripts/test-rate-limit.cjs --concurrency=20 --requests=200 --interval=20"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
