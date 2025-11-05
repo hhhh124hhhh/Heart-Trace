@@ -3,7 +3,7 @@
   command = "pnpm build"
 
 [functions]
-  node_version = "18"
+  # node_version配置已移除，将在package.json中指定
   node_bundler = "esbuild"
 
 # 环境变量需要在Netlify控制台中设置

@@ -120,10 +120,9 @@ function updateRateCounters(clientIP, userId = null) {
 
 // 获取客户端IP
 function getClientIP(request) {
-  return request.headers['x-forwarded-for'] || 
-         request.headers['x-real-ip'] || 
-         request.connection.remoteAddress ||
-         'unknown';
+  return request.headers?.['x-forwarded-for'] || 
+         request.headers?.['x-real-ip'] || 
+         (request.connection?.remoteAddress || 'unknown');
 }
 
 // 日志记录
@@ -179,7 +178,7 @@ exports.handler = async (event, context) => {
 
   try {
     const clientIP = getClientIP(event);
-    const userAgent = event.headers['user-agent'] || 'unknown';
+    const userAgent = event.headers?.['user-agent'] || 'unknown';
     
     // 清理过期记录
     cleanupExpiredRecords();
