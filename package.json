@@ -1,8 +1,11 @@
 {
-  "name": "react_repo",
+  "name": "heart_trace",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "pnpm install --prefer-offline && vite",
     "build": "pnpm install --prefer-offline && rm -rf node_modules/.vite-temp && tsc -b && vite build",
