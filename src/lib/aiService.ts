@@ -3,7 +3,10 @@ import { aiSettingsDB } from './aiSettingsDB';
 import { GENTLE_RESPONSE_PROMPT } from './aiModels';
 
 // API代理基础URL
-const API_PROXY_URL = import.meta.env.VITE_API_BASE_URL || '/.netlify/functions/zhipu-proxy';
+// 开发环境使用环境变量，生产环境自动使用相对路径（无需知道具体域名）
+const API_PROXY_URL = import.meta.env.DEV && import.meta.env.VITE_API_BASE_URL 
+  ? import.meta.env.VITE_API_BASE_URL 
+  : '/.netlify/functions/zhipu-proxy';
 
 /**
  * 调用API代理服务生成回应
