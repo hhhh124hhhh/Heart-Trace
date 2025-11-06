@@ -84,3 +84,6 @@ test-export.html
 scripts/test-export.cjs
 心迹数据导出_2025-11-06_13-28-45.json
 心迹数据导出_2025-11-06_14-09-22.json
+CLAUDE.md
+.claude/settings.local.json
+ANIMATION_FEATURES.md

@@ -194,7 +194,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
                     aiServiceStatus.available ? 'bg-semantic-success' : 'bg-neutral-stone'
                   }`}></div>
                   <span className={`text-caption ${
-                    aiServiceStatus.available ? 'text-semantic-success' : 'text-neutral-stone'
+                    aiServiceStatus.available ? 'text-semantic-success' : 'text-neutral-earth'
                   }`}>
                     {aiServiceStatus.message}
                   </span>
@@ -281,9 +281,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
         {/* 关于 */}
         <div className="animate-slide-up" style={{ animationDelay: '0.5s' }}>
           <div className="p-24 rounded-xl bg-white/90 backdrop-blur-sm shadow-sm">
-            <div className="flex items-center gap-12 text-body-small text-neutral-stone">
-              <Info className="w-4 h-4" />
-              <span>心迹 v1.0.0</span>
+            <div className="flex items-center gap-4 text-body-small text-neutral-stone">
+              <img src="/icon-192.svg" alt="心迹logo" className="w-6 h-6" />
+              <span>心迹 v1.0.1</span>
             </div>
             <p className="text-caption text-neutral-stone mt-8 leading-relaxed">
               温柔对待自己的每一个瞬间

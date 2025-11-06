@@ -44,9 +44,9 @@ module.exports = {
 					white: '#FFFFFF',
 					cloud: '#F8F9FA',
 					mist: '#E8EAED',
-					stone: '#9AA0A6',
-					earth: '#5F6368',
-					dark: '#2C3E50',
+					stone: '#5D6D7E',  // 增强对比度
+					earth: '#34495E',  // 增强对比度
+					dark: '#1A252F',  // 增强对比度，更深
 				},
 				semantic: {
 					success: '#66BB6A',
@@ -134,9 +134,9 @@ module.exports = {
 				'slower': '800ms',
 			},
 			backgroundImage: {
-				'gradient-morning': 'linear-gradient(135deg, #E0F7FA 0%, #FFF8E1 100%)',
-				'gradient-calm': 'linear-gradient(180deg, #F8F9FA 0%, #E8F5E9 100%)',
-				'gradient-warm': 'linear-gradient(135deg, #FFCBA4 0%, #FF8C42 100%)',
+				'gradient-morning': 'linear-gradient(135deg, #E3F2FD 0%, #FFF3E0 100%)',
+				'gradient-calm': 'linear-gradient(180deg, #F5F5F5 0%, #E8F5E9 100%)',
+				'gradient-warm': 'linear-gradient(135deg, #FFCCBC 0%, #FF8A65 100%)',
 				'gradient-primary': 'linear-gradient(135deg, #4A9B5F, #87CEEB)',
 			},
 		},

@@ -33,16 +33,14 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               <div className="relative">
                 <Icon
                   className={`w-6 h-6 transition-colors ${
-                    isActive ? 'text-primary-500' : 'text-neutral-stone'
+                    isActive ? 'text-primary-700' : 'text-neutral-earth'
                   }`}
                 />
                 {isActive && (
                   <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary-500 animate-scale-in"></div>
                 )}
               </div>
-              <span className={`text-[12px] font-medium mt-4 whitespace-nowrap ${
-                isActive ? 'text-primary-500' : 'text-neutral-stone'
-              }`}>
+              <span className={`text-[12px] font-medium mt-4 whitespace-nowrap ${                  isActive ? 'text-primary-700' : 'text-neutral-earth'                }`}>
                 {tab.label}
               </span>
             </button>

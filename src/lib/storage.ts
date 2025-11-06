@@ -47,13 +47,13 @@ const settingsStore = localforage.createInstance({
 // 默认情绪标签
 export const DEFAULT_TAGS: Tag[] = [
   { id: 'happy', name: '开心', color: 'linear-gradient(135deg, #FFE082, #FFB74D)', isCustom: false },
-  { id: 'sad', name: '难过', color: 'linear-gradient(135deg, #90CAF9, #64B5F6)', isCustom: false },
-  { id: 'anxious', name: '焦虑', color: 'linear-gradient(135deg, #CE93D8, #BA68C8)', isCustom: false },
   { id: 'calm', name: '平静', color: 'linear-gradient(135deg, #A5D6A7, #66BB6A)', isCustom: false },
-  { id: 'tired', name: '疲惫', color: 'linear-gradient(135deg, #B0BEC5, #90A4AE)', isCustom: false },
-  { id: 'excited', name: '兴奋', color: 'linear-gradient(135deg, #FF8A65, #FF7043)', isCustom: false },
-  { id: 'down', name: '失落', color: 'linear-gradient(135deg, #B0BEC5, #78909C)', isCustom: false },
   { id: 'grateful', name: '感恩', color: 'linear-gradient(135deg, #FFCC80, #FFA726)', isCustom: false },
+  { id: 'sad', name: '难过', color: 'linear-gradient(135deg, #90CAF9, #64B5F6)', isCustom: false },
+  { id: 'excited', name: '兴奋', color: 'linear-gradient(135deg, #FF8A65, #FF7043)', isCustom: false },
+  { id: 'anxious', name: '焦虑', color: 'linear-gradient(135deg, #CE93D8, #BA68C8)', isCustom: false },
+  { id: 'tired', name: '疲惫', color: 'linear-gradient(135deg, #B0BEC5, #90A4AE)', isCustom: false },
+  { id: 'down', name: '失落', color: 'linear-gradient(135deg, #B0BEC5, #78909C)', isCustom: false },
 ];
 
 // 记录相关操作

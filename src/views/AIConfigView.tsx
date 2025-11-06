@@ -93,7 +93,7 @@ export const AIConfigView: React.FC<AIConfigViewProps> = ({ onBack }) => {
               </div>
               <div>
                 <h4 className="font-medium text-neutral-dark mb-4">自动限流保护</h4>
-                <p className="text-body-small text-neutral-stone">
+                <p className="text-body-small text-neutral-earth">
                   系统自动限制API调用频率（100次/天，10次/小时/IP），确保服务稳定运行。
                 </p>
               </div>
@@ -105,7 +105,7 @@ export const AIConfigView: React.FC<AIConfigViewProps> = ({ onBack }) => {
               </div>
               <div>
                 <h4 className="font-medium text-neutral-dark mb-4">智能降级处理</h4>
-                <p className="text-body-small text-neutral-stone">
+                <p className="text-body-small text-neutral-earth">
                   当AI服务不可用时，系统会自动提供预设的温柔回应，确保用户体验连续性。
                 </p>
               </div>
@@ -117,7 +117,7 @@ export const AIConfigView: React.FC<AIConfigViewProps> = ({ onBack }) => {
               </div>
               <div>
                 <h4 className="font-medium text-neutral-dark mb-4">隐私保护</h4>
-                <p className="text-body-small text-neutral-stone">
+                <p className="text-body-small text-neutral-earth">
                   所有数据仅用于生成回应，不会存储用户个人信息，对话内容本地保存。
                 </p>
               </div>
@@ -140,8 +140,8 @@ export const AIConfigView: React.FC<AIConfigViewProps> = ({ onBack }) => {
 
         {/* 技术信息 */}
         <div className="mt-32 p-16 bg-neutral-mist/30 rounded-lg">
-          <h4 className="font-medium text-neutral-stone mb-8">技术信息</h4>
-          <div className="space-y-4 text-body-small text-neutral-stone">
+          <h4 className="font-medium text-neutral-earth mb-8">技术信息</h4>
+          <div className="space-y-4 text-body-small text-neutral-earth">
             <p><strong>AI模型:</strong> 智谱GLM-4-Flash</p>
             <p><strong>部署方式:</strong> Netlify Functions</p>
             <p><strong>数据存储:</strong> 本地IndexedDB</p>
