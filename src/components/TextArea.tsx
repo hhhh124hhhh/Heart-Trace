@@ -46,10 +46,10 @@ export const TextArea: React.FC<TextAreaProps> = ({
         />
         {showCharCount && (
           <div className="absolute bottom-12 right-12 text-caption text-neutral-stone">
-            {remaining > 0 ? (
+            {remaining > 0 && charCount > 0 ? (
               <span className="text-accent-sunrise">还差{remaining}字</span>
             ) : (
-              <span>{charCount}字</span>
+              <span>{charCount > 0 ? `${charCount}字` : '选个心情标签或写点什么'}</span>
             )}
           </div>
         )}

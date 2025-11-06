@@ -50,10 +50,9 @@ export const HomeView: React.FC = () => {
   };
   
   const handleGenerateResponse = async () => {
-    // 根据环境区分字数限制：开发环境5字，生产环境20字
-    const requiredLength = import.meta.env.DEV ? 5 : 20;
-    if (content.length < requiredLength) {
-      setToast({ message: '再多写一点，让我更了解你', type: 'error' });
+    // 检查是否有内容或选择了标签
+    if (content.trim().length === 0 && selectedTags.length === 0) {
+      setToast({ message: '请记录一些感受或选择心情标签', type: 'error' });
       return;
     }
     
@@ -205,8 +204,8 @@ export const HomeView: React.FC = () => {
             size="xl"
             icon={<Sparkles className="w-5 h-5" />}
             onClick={handleGenerateResponse}
-            // 根据环境区分字数限制：开发环境5字，生产环境20字
-            disabled={content.length < (import.meta.env.DEV ? 5 : 20)}
+            // 有内容或选择了标签时才能提交
+            disabled={content.trim().length === 0 && selectedTags.length === 0}
             loading={false}
           >
             获得温柔回应
