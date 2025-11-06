@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { User, Tag, TrendingUp, Lock, Bell, Info, Bot, ChevronRight, Download } from 'lucide-react';
-import { settingsDB, statsDB, tagsDB, DEFAULT_TAGS } from '../lib/storage';
+import { User, Tag, TrendingUp, Lock, Bell, Info, Bot, ChevronRight, Download, Upload } from 'lucide-react';
+import { settingsDB, statsDB, tagsDB, recordsDB, DEFAULT_TAGS } from '../lib/storage';
 import { aiSettingsDB } from '../lib/aiSettingsDB';
 import { EmotionTag } from '../components/EmotionTag';
 import { Button } from '../components/Button';
 import { DataExportModal } from '../components/DataExportModal';
-import type { UserSettings, UserStats, Tag as TagType } from '../types';
+import { DataImportModal } from '../components/DataImportModal';
+import { EmotionDashboard } from '../components/EmotionDashboard';
+import type { UserSettings, UserStats, Tag as TagType, DailyRecord } from '../types';
 import { aiService } from '../lib/aiService';
 
 interface ProfileViewProps {
@@ -16,12 +18,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [tags, setTags] = useState<TagType[]>(DEFAULT_TAGS);
+  const [recentRecords, setRecentRecords] = useState<DailyRecord[]>([]);
   const [aiServiceStatus, setAiServiceStatus] = useState({
     available: false,
     checking: true,
     message: '检查中...'
   });
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // 检查AI服务状态
   const checkAIServiceStatus = async () => {
@@ -55,6 +59,17 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
   
   useEffect(() => {
     loadData();
+    
+    // 监听数据导入事件
+    const handleDataImported = () => {
+      loadData();
+    };
+    
+    window.addEventListener('data-imported', handleDataImported);
+    
+    return () => {
+      window.removeEventListener('data-imported', handleDataImported);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
@@ -68,8 +83,23 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
     const allTags = await tagsDB.getAll();
     setTags(allTags);
     
+    // 获取最近14天的记录用于趋势图
+    const allRecords = await recordsDB.getAll();
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+    const recent = allRecords.filter(record => {
+      const recordDate = new Date(record.date);
+      return recordDate >= twoWeeksAgo;
+    });
+    setRecentRecords(recent);
+    
     // 检测用户级别，决定是否显示高级模式
     await checkUserLevel();
+  };
+
+  const handleImportComplete = () => {
+    // 导入完成后刷新数据
+    loadData();
   };
   
   const checkUserLevel = async () => {
@@ -140,27 +170,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
         <div className="mb-32 animate-slide-up" style={{ animationDelay: '0.1s' }}>
           <h3 className="text-h3 font-semibold text-neutral-dark mb-16 flex items-center gap-8">
             <TrendingUp className="w-5 h-5" />
-            数据统计
+            情绪仪表盘
           </h3>
           <div className="grid grid-cols-2 gap-16">
-            <div className="p-32 rounded-xl bg-white/90 backdrop-blur-sm shadow-sm">
-              <div className="text-display font-bold text-primary-500 mb-8">
-                {stats?.totalRecords || 0}
-              </div>
-              <div className="text-body-small text-neutral-stone">总记录数</div>
-            </div>
-            <div className="p-32 rounded-xl bg-white/90 backdrop-blur-sm shadow-sm">
-              <div className="text-display font-bold text-secondary-500 mb-8">
-                {stats?.continuousDays || 0}
-              </div>
-              <div className="text-body-small text-neutral-stone">连续天数</div>
-            </div>
-            <div className="col-span-2 p-24 rounded-xl bg-white/90 backdrop-blur-sm shadow-sm">
-              <div className="text-body-small text-neutral-stone mb-8">最常情绪</div>
-              <div className="text-h3 font-semibold text-neutral-dark">
-                {getMostFrequentEmotion()}
-              </div>
-            </div>
+
+            <EmotionDashboard records={recentRecords} tags={tags} />
           </div>
         </div>
         
@@ -206,20 +220,38 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
         <div className="mb-32 animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <h3 className="text-h3 font-semibold text-neutral-dark mb-16">设置</h3>
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden">
-            {/* 数据导出 */}
-            <button
-              onClick={() => setShowExportModal(true)}
-              className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors border-b border-neutral-mist"
-            >
-              <div className="flex items-center gap-12">
-                <Download className="w-5 h-5 text-neutral-stone" />
-                <div className="text-left">
-                  <div className="text-body text-neutral-dark">数据导出</div>
-                  <div className="text-caption text-neutral-stone">导出您的所有记录和设置</div>
+            {/* 数据管理 */}
+            <div className="grid grid-cols-2 border-b border-neutral-mist">
+              {/* 数据导入 */}
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors border-r border-neutral-mist"
+              >
+                <div className="flex items-center gap-12">
+                  <Upload className="w-5 h-5 text-neutral-stone" />
+                  <div className="text-left">
+                    <div className="text-body text-neutral-dark">数据导入</div>
+                    <div className="text-caption text-neutral-stone">恢复备份数据</div>
+                  </div>
                 </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-neutral-stone" />
-            </button>
+                <ChevronRight className="w-5 h-5 text-neutral-stone" />
+              </button>
+
+              {/* 数据导出 */}
+              <button
+                onClick={() => setShowExportModal(true)}
+                className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors"
+              >
+                <div className="flex items-center gap-12">
+                  <Download className="w-5 h-5 text-neutral-stone" />
+                  <div className="text-left">
+                    <div className="text-body text-neutral-dark">数据导出</div>
+                    <div className="text-caption text-neutral-stone">备份记录和设置</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-neutral-stone" />
+              </button>
+            </div>
             
             {/* 默认隐私模式 */}
             <div className="flex items-center justify-between p-24">
@@ -264,6 +296,13 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
       <DataExportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
+      />
+      
+      {/* 数据导入模态框 */}
+      <DataImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={handleImportComplete}
       />
     </div>
   );

@@ -21,6 +21,17 @@ export const HomeView: React.FC = () => {
   // 加载标签和今日记录
   useEffect(() => {
     loadData();
+    
+    // 监听数据导入事件
+    const handleDataImported = () => {
+      loadData();
+    };
+    
+    window.addEventListener('data-imported', handleDataImported);
+    
+    return () => {
+      window.removeEventListener('data-imported', handleDataImported);
+    };
   }, []);
   
   // 调试文本长度变化

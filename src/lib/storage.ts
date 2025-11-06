@@ -29,12 +29,12 @@ export interface ExportOptions {
 }
 
 // 初始化数据存储
-const recordStore = localforage.createInstance({
+export const recordStore = localforage.createInstance({
   name: 'daily-reflection',
   storeName: 'records',
 });
 
-const tagStore = localforage.createInstance({
+export const tagStore = localforage.createInstance({
   name: 'daily-reflection',
   storeName: 'tags',
 });
@@ -129,6 +129,11 @@ export const tagsDB = {
       return DEFAULT_TAGS;
     }
     return stored;
+  },
+  
+  async getById(id: string): Promise<Tag | undefined> {
+    const tags = await this.getAll();
+    return tags.find(tag => tag.id === id);
   },
 
   async init(): Promise<void> {

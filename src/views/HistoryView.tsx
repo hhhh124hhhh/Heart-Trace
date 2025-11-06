@@ -17,6 +17,17 @@ export const HistoryView: React.FC = () => {
   
   useEffect(() => {
     loadData();
+    
+    // 监听数据导入事件
+    const handleDataImported = () => {
+      loadData();
+    };
+    
+    window.addEventListener('data-imported', handleDataImported);
+    
+    return () => {
+      window.removeEventListener('data-imported', handleDataImported);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
