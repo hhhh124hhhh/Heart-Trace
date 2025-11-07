@@ -234,6 +234,48 @@ export const ANIMATIONS = {
       transition: { duration: 0.2 }
     }
   } as Variants,
+// 简化的模态框动画
+  MODAL: {
+    initial: { 
+      opacity: 0, 
+      scale: 0.8,
+      y: 20,
+    },
+    animate: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+        mass: 0.8,
+      }
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.8,
+      y: 20,
+      transition: { duration: 0.2 }
+    }
+  },
+
+  // 淡入上升动画
+  FADE_IN_UP: {
+    initial: { 
+      opacity: 0, 
+      y: 30,
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+      }
+    }
+  }
 } as const;
 
 // 通用过渡配置

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { HomeView } from './views/HomeView';
 import { HistoryView } from './views/HistoryView';
-import { ProfileView } from './views/ProfileView';
+import { InsightsView } from './views/InsightsView';
+import { SettingsView } from './views/SettingsView';
 import { AIConfigView } from './views/AIConfigView';
 import { BottomNav } from './components/BottomNav';
 import { AnimationProvider } from './contexts/AnimationContext';
@@ -15,13 +16,13 @@ function App() {
       <div className="min-h-screen pb-[80px] pb-[calc(80px+env(safe-area-inset-bottom))]">
         
         {/* 视图内容 - 应用直接可用，无需配置 */}
-        {currentView === 'home' && <HomeView />}
-        {currentView === 'history' && <HistoryView />}
-        {currentView === 'profile' && (
-          <ProfileView onNavigateToAIConfig={() => setCurrentView('ai-config')} />
+        {currentView === 'home' && (
+          <HomeView onNavigateToInsights={() => setCurrentView('insights')} />
         )}
-        {currentView === 'ai-config' && (
-          <AIConfigView onBack={() => setCurrentView('profile')} />
+        {currentView === 'history' && <HistoryView />}
+        {currentView === 'insights' && <InsightsView />}
+        {currentView === 'settings' && (
+          <SettingsView />
         )}
         
         {/* 底部导航 */}

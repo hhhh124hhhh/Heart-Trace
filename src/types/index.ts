@@ -42,7 +42,6 @@ export interface UserSettings {
   defaultPrivate: boolean;
   dailyReminder: boolean;
   reminderTime: string;
-  faceLock: boolean;
 }
 
 // AI回应请求
@@ -88,5 +87,32 @@ export interface AIServiceSettings {
   isConfigured: boolean;
 }
 
+// 周统计相关类型
+export interface WeeklyStats {
+  weekRange: {
+    start: string;
+    end: string;
+    weekNumber: number;
+  };
+  totalRecords: number;
+  previousWeekRecords: number;
+  emotionDistribution: { [key: string]: number };
+  topEmotions: Array<{ emotion: string; count: number; percentage: number }>;
+  averageEmotions: {
+    calmness: number;
+    positivity: number;
+    energy: number;
+  };
+  continuousDays: number;
+  dayDistribution: Array<{ 
+    date: string; 
+    count: number; 
+    primaryEmotion?: string;
+    calmness?: number;
+    positivity?: number;
+    energy?: number;
+  }>;
+}
+
 // 视图类型
-export type View = 'home' | 'history' | 'profile' | 'ai-config';
+export type View = 'home' | 'history' | 'insights' | 'settings' | 'ai-config';

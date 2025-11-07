@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Tag, TrendingUp, Lock, Bell, Info, Bot, ChevronRight, Download, Upload } from 'lucide-react';
+import { User, Tag, TrendingUp, Lock, Bell, Info, Bot, ChevronRight, Download, Upload, BarChart3 } from 'lucide-react';
 import { settingsDB, statsDB, tagsDB, recordsDB, DEFAULT_TAGS } from '../lib/storage';
 import { aiSettingsDB } from '../lib/aiSettingsDB';
 import { EmotionTag } from '../components/EmotionTag';
@@ -7,6 +7,7 @@ import { Button } from '../components/Button';
 import { DataExportModal } from '../components/DataExportModal';
 import { DataImportModal } from '../components/DataImportModal';
 import { EmotionDashboard } from '../components/EmotionDashboard';
+import { WeeklySummaryModal } from '../components/WeeklySummaryModal';
 import type { UserSettings, UserStats, Tag as TagType, DailyRecord } from '../types';
 import { aiService } from '../lib/aiService';
 
@@ -26,6 +27,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
   });
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showWeeklySummary, setShowWeeklySummary] = useState(false);
 
   // 检查AI服务状态
   const checkAIServiceStatus = async () => {
@@ -221,36 +223,56 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
           <h3 className="text-h3 font-semibold text-neutral-dark mb-16">设置</h3>
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden">
             {/* 数据管理 */}
-            <div className="grid grid-cols-2 border-b border-neutral-mist">
-              {/* 数据导入 */}
-              <button
-                onClick={() => setShowImportModal(true)}
-                className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors border-r border-neutral-mist"
-              >
-                <div className="flex items-center gap-12">
-                  <Upload className="w-5 h-5 text-neutral-stone" />
-                  <div className="text-left">
-                    <div className="text-body text-neutral-dark">数据导入</div>
-                    <div className="text-caption text-neutral-stone">恢复备份数据</div>
+            <div className="border-b border-neutral-mist">
+              {/* 第一行：数据导入和导出 */}
+              <div className="grid grid-cols-2">
+                {/* 数据导入 */}
+                <button
+                  onClick={() => setShowImportModal(true)}
+                  className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors border-r border-neutral-mist"
+                >
+                  <div className="flex items-center gap-12">
+                    <Upload className="w-5 h-5 text-neutral-stone" />
+                    <div className="text-left">
+                      <div className="text-body text-neutral-dark">数据导入</div>
+                      <div className="text-caption text-neutral-stone">恢复备份数据</div>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-neutral-stone" />
-              </button>
+                  <ChevronRight className="w-5 h-5 text-neutral-stone" />
+                </button>
 
-              {/* 数据导出 */}
-              <button
-                onClick={() => setShowExportModal(true)}
-                className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors"
-              >
-                <div className="flex items-center gap-12">
-                  <Download className="w-5 h-5 text-neutral-stone" />
-                  <div className="text-left">
-                    <div className="text-body text-neutral-dark">数据导出</div>
-                    <div className="text-caption text-neutral-stone">备份记录和设置</div>
+                {/* 数据导出 */}
+                <button
+                  onClick={() => setShowExportModal(true)}
+                  className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors"
+                >
+                  <div className="flex items-center gap-12">
+                    <Download className="w-5 h-5 text-neutral-stone" />
+                    <div className="text-left">
+                      <div className="text-body text-neutral-dark">数据导出</div>
+                      <div className="text-caption text-neutral-stone">备份记录和设置</div>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-neutral-stone" />
-              </button>
+                  <ChevronRight className="w-5 h-5 text-neutral-stone" />
+                </button>
+              </div>
+
+              {/* 第二行：数据统计 */}
+              <div className="border-t border-neutral-mist">
+                <button
+                  onClick={() => setShowWeeklySummary(true)}
+                  className="flex items-center justify-between p-24 w-full hover:bg-neutral-50 transition-colors"
+                >
+                  <div className="flex items-center gap-12">
+                    <BarChart3 className="w-5 h-5 text-primary-500" />
+                    <div className="text-left">
+                      <div className="text-body text-neutral-dark">数据统计</div>
+                      <div className="text-caption text-neutral-stone">查看周总结和数据分析</div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-neutral-stone" />
+                </button>
+              </div>
             </div>
             
             {/* 默认隐私模式 */}
@@ -283,7 +305,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
           <div className="p-24 rounded-xl bg-white/90 backdrop-blur-sm shadow-sm">
             <div className="flex items-center gap-4 text-body-small text-neutral-stone">
               <img src="/icon-192.svg" alt="心迹logo" className="w-6 h-6" />
-              <span>心迹 v1.0.1</span>
+              <span>心迹 v2.0</span>
             </div>
             <p className="text-caption text-neutral-stone mt-8 leading-relaxed">
               温柔对待自己的每一个瞬间
@@ -303,6 +325,12 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ onNavigateToAIConfig }
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
         onImportComplete={handleImportComplete}
+      />
+
+      {/* 周总结模态框 */}
+      <WeeklySummaryModal
+        isOpen={showWeeklySummary}
+        onClose={() => setShowWeeklySummary(false)}
       />
     </div>
   );

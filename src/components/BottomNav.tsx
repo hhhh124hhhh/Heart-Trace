@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, History, User } from 'lucide-react';
+import { Home, History, BarChart3, Settings } from 'lucide-react';
 import type { View } from '../types';
 
 interface BottomNavProps {
@@ -14,7 +14,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const tabs = [
     { id: 'home' as View, label: '今日', icon: Home },
     { id: 'history' as View, label: '历史', icon: History },
-    { id: 'profile' as View, label: '我的', icon: User },
+    { id: 'insights' as View, label: '洞察', icon: BarChart3 },
+    { id: 'settings' as View, label: '设置', icon: Settings },
   ];
   
   return (

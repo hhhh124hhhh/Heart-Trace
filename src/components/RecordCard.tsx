@@ -7,13 +7,15 @@ import { DEFAULT_TAGS } from '../lib/storage';
 interface RecordCardProps {
   record: DailyRecord;
   onToggleFavorite?: (id: string) => void;
+  defaultExpanded?: boolean;
 }
 
 export const RecordCard: React.FC<RecordCardProps> = ({
   record,
   onToggleFavorite,
+  defaultExpanded = false,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   
   // 使用useMemo确保日期计算仅在record.date变化时重新计算
   const { dateStr, timeStr } = useMemo(() => {
@@ -54,7 +56,15 @@ export const RecordCard: React.FC<RecordCardProps> = ({
         </div>
         <div className="flex items-center gap-12">
           {record.aiResponse && (
-            <MessageCircle className="w-4 h-4 text-secondary-500" />
+            <div className="flex items-center gap-4">
+              <MessageCircle className="w-4 h-4 text-secondary-500" />
+              {defaultExpanded && (
+                <div className="flex items-center gap-2 px-2 py-1 bg-secondary-100 rounded-full animate-fade-in">
+                  <div className="w-2 h-2 bg-secondary-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-secondary-600 font-medium">新回复</span>
+                </div>
+              )}
+            </div>
           )}
           <button
             onClick={(e) => {

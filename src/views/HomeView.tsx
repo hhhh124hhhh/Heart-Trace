@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Lock, LockOpen } from 'lucide-react';
+import { Sparkles, Lock, LockOpen, BarChart3 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { EmotionTag } from '../components/EmotionTag';
 import { TextArea } from '../components/TextArea';
@@ -10,14 +10,21 @@ import { Toast } from '../components/Toast';
 import { ThinkingBubble } from '../components/ThinkingBubble';
 import { AIResponseText } from '../components/TypewriterText';
 import { SuccessParticles } from '../components/ParticleEffect';
-import { SuccessModal } from '../components/Modal';
-import { recordsDB, tagsDB, statsDB, DEFAULT_TAGS } from '../lib/storage';
+import { AIResponseModal } from '../components/AIResponseModal';
+import { WeeklySummaryModal } from '../components/WeeklySummaryModal';
+import { WeeklyInsightSummary } from '../components/WeeklyInsightSummary';
+import { WeeklySummaryTestButton } from '../test/WeeklySummaryTestButton';
+import { recordsDB, tagsDB, statsDB, weeklyStatsDB, DEFAULT_TAGS } from '../lib/storage';
 import { aiService } from '../lib/aiService';
 import { useAnimation } from '../contexts/AnimationContext';
 import { ANIMATIONS } from '../lib/animations';
 import type { DailyRecord, Tag } from '../types';
 
-export const HomeView: React.FC = () => {
+interface HomeViewProps {
+  onNavigateToInsights?: () => void;
+}
+
+export const HomeView: React.FC<HomeViewProps> = ({ onNavigateToInsights }) => {
   const [content, setContent] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isPrivate, setIsPrivate] = useState(false);
@@ -26,15 +33,20 @@ export const HomeView: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showThinking, setShowThinking] = useState(false);
   const [currentAIResponse, setCurrentAIResponse] = useState<string>('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showAIMessage, setShowAIMessage] = useState(false);
+  const [showAIResponseModal, setShowAIResponseModal] = useState(false);
+  const [aiResponseForModal, setAiResponseForModal] = useState('');
   const [showParticles, setShowParticles] = useState(false);
+  const [showWeeklySummary, setShowWeeklySummary] = useState(false);
+  const [showWeeklyReminder, setShowWeeklyReminder] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   
   const { shouldAnimate } = useAnimation();
   const saveButtonRef = useRef<HTMLDivElement>(null);
-  // 加载标签和今日记录
+  // 加载标签和今日记录，检查周总结提醒
   useEffect(() => {
     loadData();
+    checkWeeklyReminder();
     
     // 监听数据导入事件
     const handleDataImported = () => {
@@ -47,6 +59,21 @@ export const HomeView: React.FC = () => {
       window.removeEventListener('data-imported', handleDataImported);
     };
   }, []);
+
+  // 检查是否应该显示周总结提醒
+  const checkWeeklyReminder = async () => {
+    try {
+      const shouldShow = await weeklyStatsDB.shouldShowWeeklyReminder();
+      if (shouldShow) {
+        // 延迟2秒显示提醒，让用户先看到页面内容
+        setTimeout(() => {
+          setShowWeeklyReminder(true);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('检查周总结提醒失败:', error);
+    }
+  };
   
   // 调试文本长度变化
   useEffect(() => {
@@ -94,9 +121,11 @@ export const HomeView: React.FC = () => {
       // 隐藏思考动画
       setShowThinking(false);
       
-      // 显示AI回复
+      // 显示AI回复弹窗
       if (aiResult.response && !aiResult.error) {
         setCurrentAIResponse(aiResult.response);
+        setAiResponseForModal(aiResult.response);
+        setShowAIResponseModal(true);
       }
       
       // 保存记录
@@ -112,10 +141,9 @@ export const HomeView: React.FC = () => {
       // 更新统计
       await statsDB.calculateStats();
       
-      // 显示成功动画
+      // 显示成功动画（无弹窗）
       setShowParticles(true);
       setTimeout(() => {
-        setShowSuccessModal(true);
         setShowParticles(false);
       }, shouldAnimate() ? 500 : 0);
       
@@ -124,6 +152,7 @@ export const HomeView: React.FC = () => {
       setSelectedTags([]);
       setIsPrivate(false);
       setCurrentAIResponse('');
+      setShowAIMessage(false);
       
       // 重新加载今日记录
       await loadData();
@@ -146,7 +175,6 @@ export const HomeView: React.FC = () => {
         
         setShowParticles(true);
         setTimeout(() => {
-          setShowSuccessModal(true);
           setShowParticles(false);
         }, shouldAnimate() ? 500 : 0);
         
@@ -235,7 +263,7 @@ export const HomeView: React.FC = () => {
         </div>
         
         {/* 生成按钮 */}
-        <div className="mb-48">
+        <div className="mb-24">
           <div ref={saveButtonRef}>
             <Button
               fullWidth
@@ -250,6 +278,11 @@ export const HomeView: React.FC = () => {
             </Button>
           </div>
         </div>
+
+        {/* 本周数据摘要 */}
+        {onNavigateToInsights && (
+          <WeeklyInsightSummary onNavigateToInsights={onNavigateToInsights} />
+        )}
 
         {/* 思考动画 */}
         <AnimatePresence>
@@ -310,16 +343,69 @@ export const HomeView: React.FC = () => {
           />
         )}
 
-        {/* 成功模态框 */}
-        <SuccessModal
-          isOpen={showSuccessModal}
-          onClose={() => setShowSuccessModal(false)}
-          title="记录保存成功！"
-          message="你的感受已被好好保存，AI已为你准备了温柔回应。"
-          actionText="继续记录"
-          onAction={() => {
-            setShowSuccessModal(false);
+        {/* AI回复弹窗 */}
+        <AIResponseModal
+          isOpen={showAIResponseModal}
+          response={aiResponseForModal}
+          onClose={() => {
+            setShowAIResponseModal(false);
+            setAiResponseForModal('');
           }}
+        />
+
+        {/* 周总结提醒 */}
+        <AnimatePresence>
+          {showWeeklyReminder && (
+            <motion.div
+              className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-16"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="bg-white rounded-2xl shadow-xl max-w-md w-full p-24"
+                initial={shouldAnimate ? ANIMATIONS.MODAL.initial : {}}
+                animate={shouldAnimate ? ANIMATIONS.MODAL.animate : {}}
+                exit={shouldAnimate ? ANIMATIONS.MODAL.exit : {}}
+              >
+                <div className="text-center mb-20">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-16">
+                    <BarChart3 className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-h3 font-semibold text-neutral-dark mb-8">
+                    查看本周心迹总结
+                  </h3>
+                  <p className="text-body text-neutral-stone mb-20">
+                    又到了周末时间！回顾一下这周的心情历程，发现更好的自己。
+                  </p>
+                </div>
+                
+                <div className="flex gap-12">
+                  <button
+                    onClick={() => setShowWeeklyReminder(false)}
+                    className="flex-1 px-16 py-12 rounded-full border-2 border-neutral-mist text-neutral-dark hover:bg-neutral-50 transition-colors"
+                  >
+                    稍后再说
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowWeeklyReminder(false);
+                      setShowWeeklySummary(true);
+                    }}
+                    className="flex-1 px-16 py-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90 transition-opacity"
+                  >
+                    立即查看
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 周总结弹窗 */}
+        <WeeklySummaryModal
+          isOpen={showWeeklySummary}
+          onClose={() => setShowWeeklySummary(false)}
         />
         
         {/* 今日足迹 */}
@@ -327,11 +413,12 @@ export const HomeView: React.FC = () => {
           <div>
             <h3 className="text-h3 font-semibold text-neutral-dark mb-16">今日足迹</h3>
             <div className="space-y-16">
-              {todayRecords.slice(0, 3).map(record => (
+              {todayRecords.slice(0, 3).map((record, index) => (
                 <RecordCard
                   key={record.id}
                   record={record}
                   onToggleFavorite={handleToggleFavorite}
+                  defaultExpanded={index === 0 && showAIMessage} // 只对第一个记录且刚获得AI回复时默认展开
                 />
               ))}
             </div>
@@ -346,6 +433,9 @@ export const HomeView: React.FC = () => {
       
       {loading && <LoadingOverlay />}
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+      
+      {/* 开发测试工具 */}
+      {import.meta.env.DEV && <WeeklySummaryTestButton />}
     </div>
   );
 };

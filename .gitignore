@@ -87,3 +87,6 @@ scripts/test-export.cjs
 CLAUDE.md
 .claude/settings.local.json
 ANIMATION_FEATURES.md
+scripts/test-weekly-summary.cjs
+心迹数据导出_2025-11-07_12-37-51.json
+src/test/test-weekly-summary.ts

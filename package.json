@@ -1,7 +1,7 @@
 {
   "name": "heart_trace",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
@@ -16,7 +16,10 @@
     "clean": "rm -rf node_modules .pnpm-store pnpm-lock.yaml && pnpm store prune",
     "rate-limit-test": "node scripts/test-rate-limit.cjs",
     "rate-limit-test:fast": "node scripts/test-rate-limit.cjs --concurrency=10 --requests=50 --interval=50",
-    "rate-limit-test:stress": "node scripts/test-rate-limit.cjs --concurrency=20 --requests=200 --interval=20"
+    "rate-limit-test:stress": "node scripts/test-rate-limit.cjs --concurrency=20 --requests=200 --interval=20",
+    "test:weekly-summary": "node scripts/test-weekly-summary.cjs",
+    "test:weekly-summary:quick": "node scripts/test-weekly-summary.cjs --quick",
+    "test:weekly-summary:stress": "node scripts/test-weekly-summary.cjs --stress"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

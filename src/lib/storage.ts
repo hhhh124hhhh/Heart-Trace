@@ -1,5 +1,5 @@
 import localforage from 'localforage';
-import type { DailyRecord, Tag, UserStats, UserSettings } from '../types';
+import type { DailyRecord, Tag, UserStats, UserSettings, WeeklyStats } from '../types';
 
 // 导出相关类型定义
 export interface ExportData {
@@ -246,7 +246,6 @@ export const settingsDB = {
         defaultPrivate: false,
         dailyReminder: false,
         reminderTime: '20:00',
-        faceLock: false,
       };
       await settingsStore.setItem('settings', defaultSettings);
       return defaultSettings;
@@ -304,7 +303,6 @@ export const exportDB = {
         defaultPrivate: false,
         dailyReminder: false,
         reminderTime: '20:00',
-        faceLock: false,
       },
       stats: options.includeStats !== false ? stats : {
         totalRecords: 0,
@@ -364,5 +362,231 @@ export const exportDB = {
     const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
     
     return `心迹数据导出_${dateStr}_${timeStr}.${format}`;
+  }
+};
+
+// 周统计相关操作
+export const weeklyStatsDB = {
+  // 获取指定日期所在周的开始和结束日期
+  getWeekRange(date: Date): { start: Date; end: Date; weekNumber: number } {
+    const d = new Date(date);
+    const day = d.getDay();
+    // 中文习惯：周一为第一天，周日为最后一天
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 周一为第一天
+    
+    const start = new Date(d.setDate(diff));
+    start.setHours(0, 0, 0, 0);
+    
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    
+    // 计算是第几周
+    const firstDayOfYear = new Date(d.getFullYear(), 0, 1);
+    const weekNumber = Math.ceil((((d.getTime() - firstDayOfYear.getTime()) / 86400000) + firstDayOfYear.getDay() + 1) / 7);
+    
+    return { start, end, weekNumber };
+  },
+
+  // 获取本周统计数据
+  async getWeeklyStats(targetDate?: Date): Promise<WeeklyStats> {
+    const date = targetDate || new Date();
+    const { start, end, weekNumber } = this.getWeekRange(date);
+    
+    // 获取本周记录
+    const thisWeekRecords = await recordsDB.getByDateRange(
+      start.toISOString(),
+      end.toISOString()
+    );
+    
+    // 获取上周记录用于对比
+    const lastWeekStart = new Date(start);
+    lastWeekStart.setDate(start.getDate() - 7);
+    const lastWeekEnd = new Date(end);
+    lastWeekEnd.setDate(end.getDate() - 7);
+    
+    const lastWeekRecords = await recordsDB.getByDateRange(
+      lastWeekStart.toISOString(),
+      lastWeekEnd.toISOString()
+    );
+
+    // 计算情绪分布
+    const emotionDistribution: { [key: string]: number } = {};
+    const emotionData: { calmness: number[]; positivity: number[]; energy: number[] } = {
+      calmness: [],
+      positivity: [],
+      energy: []
+    };
+
+    thisWeekRecords.forEach(record => {
+      record.tags.forEach(tag => {
+        emotionDistribution[tag] = (emotionDistribution[tag] || 0) + 1;
+      });
+      
+      if (record.emotionAnalysis) {
+        emotionData.calmness.push(record.emotionAnalysis.calmness);
+        emotionData.positivity.push(record.emotionAnalysis.positivity);
+        emotionData.energy.push(record.emotionAnalysis.energy);
+      }
+    });
+
+    // 计算主要情绪
+    const totalEmotions = Object.values(emotionDistribution).reduce((sum, count) => sum + count, 0);
+    const topEmotions = Object.entries(emotionDistribution)
+      .map(([emotion, count]) => ({
+        emotion,
+        count,
+        percentage: totalEmotions > 0 ? Math.round((count / totalEmotions) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    // 计算平均情绪值
+    const averageEmotions = {
+      calmness: emotionData.calmness.length > 0 
+        ? Math.round(emotionData.calmness.reduce((sum, val) => sum + val, 0) / emotionData.calmness.length)
+        : 0,
+      positivity: emotionData.positivity.length > 0
+        ? Math.round(emotionData.positivity.reduce((sum, val) => sum + val, 0) / emotionData.positivity.length)
+        : 0,
+      energy: emotionData.energy.length > 0
+        ? Math.round(emotionData.energy.reduce((sum, val) => sum + val, 0) / emotionData.energy.length)
+        : 0
+    };
+
+  
+    // 计算每日分布
+    const dayDistribution = [];
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(start);
+      currentDate.setDate(start.getDate() + i);
+      const dateStr = currentDate.toISOString().split('T')[0];
+      
+      const dayRecords = thisWeekRecords.filter(record => 
+        record.date.split('T')[0] === dateStr
+      );
+      
+      // 找出当天的主要情绪
+      const dayEmotions: { [key: string]: number } = {};
+      dayRecords.forEach(record => {
+        record.tags.forEach(tag => {
+          dayEmotions[tag] = (dayEmotions[tag] || 0) + 1;
+        });
+      });
+      
+      const primaryEmotion = Object.entries(dayEmotions)
+        .sort(([, a], [, b]) => b - a)[0]?.[0];
+
+      // 计算当天的平均情绪分析数据
+      let dayCalmness: number | undefined;
+      let dayPositivity: number | undefined;
+      let dayEnergy: number | undefined;
+      
+      const recordsWithEmotionAnalysis = dayRecords.filter(r => r.emotionAnalysis);
+      if (recordsWithEmotionAnalysis.length > 0) {
+        dayCalmness = Math.round(
+          recordsWithEmotionAnalysis.reduce((sum, r) => sum + (r.emotionAnalysis!.calmness || 0), 0) / 
+          recordsWithEmotionAnalysis.length
+        );
+        dayPositivity = Math.round(
+          recordsWithEmotionAnalysis.reduce((sum, r) => sum + (r.emotionAnalysis!.positivity || 0), 0) / 
+          recordsWithEmotionAnalysis.length
+        );
+        dayEnergy = Math.round(
+          recordsWithEmotionAnalysis.reduce((sum, r) => sum + (r.emotionAnalysis!.energy || 0), 0) / 
+          recordsWithEmotionAnalysis.length
+        );
+      }
+
+      dayDistribution.push({
+        date: dateStr,
+        count: dayRecords.length,
+        primaryEmotion,
+        calmness: dayCalmness,
+        positivity: dayPositivity,
+        energy: dayEnergy
+      });
+    }
+
+    // 计算连续记录天数（使用全局记录，不局限于本周）
+    let continuousDays = 0;
+    const allRecords = await recordsDB.getAll();
+    
+    if (allRecords.length > 0) {
+      // 按日期分组，获取每天是否有记录
+      const dailyRecords: { [date: string]: boolean } = {};
+      
+      allRecords.forEach(record => {
+        const dateStr = record.date.split('T')[0];
+        dailyRecords[dateStr] = true;
+      });
+      
+      const currentDate = new Date();
+      currentDate.setHours(0, 0, 0, 0);
+      
+      // 从今天开始向前检查连续天数
+      while (true) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        
+        if (dailyRecords[dateStr]) {
+          continuousDays++;
+          currentDate.setDate(currentDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+    }
+
+    return {
+      weekRange: {
+        start: start.toISOString(),
+        end: end.toISOString(),
+        weekNumber
+      },
+      totalRecords: thisWeekRecords.length,
+      previousWeekRecords: lastWeekRecords.length,
+      emotionDistribution,
+      topEmotions,
+      averageEmotions,
+      continuousDays,
+      dayDistribution
+    };
+  },
+
+  
+  // 检查是否应该显示周总结提醒
+  async shouldShowWeeklyReminder(): Promise<boolean> {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=周日, 1=周一, ..., 6=周六
+    
+    // 只在周日提醒
+    if (dayOfWeek !== 0) {
+      return false;
+    }
+
+    // 检查这周是否已经有记录
+    const weekStats = await this.getWeeklyStats(now);
+    if (weekStats.totalRecords === 0) {
+      return false;
+    }
+
+    // 检查是否已经查看过本周总结
+    const lastViewedSummary = await settingsStore.getItem<string>('lastViewedWeeklySummary');
+    if (lastViewedSummary) {
+      const lastViewed = new Date(lastViewedSummary);
+      const { start: weekStart } = this.getWeekRange(now);
+      
+      // 如果本周已经查看过，则不再提醒
+      if (lastViewed >= weekStart) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  // 标记本周总结已查看
+  async markWeeklySummaryViewed(): Promise<void> {
+    await settingsStore.setItem('lastViewedWeeklySummary', new Date().toISOString());
   }
 };
